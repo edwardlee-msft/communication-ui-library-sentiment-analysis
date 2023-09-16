@@ -12,6 +12,7 @@ import {
   loadingBannerStyles
 } from './styles/Captions.style';
 import { OnRenderAvatarCallback } from '../types';
+import { AnalyzeSentimentSuccessResult } from '@azure/ai-text-analytics';
 
 /**
  * @internal
@@ -22,6 +23,8 @@ export type _CaptionsInfo = {
   displayName: string;
   captionText: string;
   userId?: string;
+  sentimentAnalysis?: AnalyzeSentimentSuccessResult;
+  isMicrosoftUser?: boolean;
 };
 
 /**
@@ -106,7 +109,11 @@ export const _CaptionsBanner = (props: _CaptionsBannerProps): JSX.Element => {
                 {captions.map((caption) => {
                   return (
                     <div key={caption.id} className={captionContainerClassName} data-is-focusable={true}>
-                      <_Caption {...caption} onRenderAvatar={onRenderAvatar} />
+                      <_Caption
+                        {...caption}
+                        onRenderAvatar={onRenderAvatar}
+                        sentimentAnalysis={caption.sentimentAnalysis}
+                      />
                     </div>
                   );
                 })}

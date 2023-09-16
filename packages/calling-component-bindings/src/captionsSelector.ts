@@ -134,7 +134,9 @@ export const _captionsBannerSelector: _CaptionsBannerSelector = reselect.createS
         id: c.timestamp.getTime() + userId + c.speaker.displayName,
         displayName: c.speaker.displayName ?? 'Unnamed Participant',
         captionText: c.captionText ?? '',
-        userId
+        userId,
+        sentimentAnalysis: c.sentimentAnalysis,
+        isMicrosoftUser: c.speaker?.identifier?.kind === 'microsoftTeamsUser'
       };
     });
     return {

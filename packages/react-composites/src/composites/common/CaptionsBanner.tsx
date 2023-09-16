@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 /* @conditional-compile-remove(close-captions) */
 import { useState } from 'react';
 /* @conditional-compile-remove(close-captions) */
@@ -19,6 +19,7 @@ import { useAdaptedSelector } from '../CallComposite/hooks/useAdaptedSelector';
 import { useHandlers } from '../CallComposite/hooks/useHandlers';
 /* @conditional-compile-remove(close-captions) */
 import { _captionsBannerSelector } from '@internal/calling-component-bindings';
+import { CaptionsContext } from './CaptionsProvider';
 
 /* @conditional-compile-remove(close-captions) */
 import { useLocale } from '../localization';
@@ -62,6 +63,11 @@ export const CaptionsBanner = (props: { isMobile: boolean }): JSX.Element => {
   const captionsBannerStrings: _CaptionsBannerStrings = {
     captionsBannerSpinnerText: strings.captionsBannerSpinnerText
   };
+
+  const { setCaptionsInfoArray } = useContext(CaptionsContext);
+  useEffect(() => {
+    setCaptionsInfoArray(captionsBannerProps.captions);
+  }, [captionsBannerProps, setCaptionsInfoArray]);
   return (
     <>
       {

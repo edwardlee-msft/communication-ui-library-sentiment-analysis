@@ -34,7 +34,8 @@
     "@azure/logger": "^1.0.4",
     "@internal/acs-ui-common": "1.7.1-beta.0",
     "events": "~3.3.0",
-    "immer": "9.0.6"
+    "immer": "9.0.6",
+    "@azure/ai-text-analytics": "^5.1.0"
   },
   "peerDependencies": {
     "@azure/communication-calling": "1.16.3-beta.1 || ^1.16.3"

@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AnalyzeSentimentSuccessResult } from '@azure/ai-text-analytics';
 import { IButtonProps } from '@fluentui/react';
 import { IButtonStyles } from '@fluentui/react';
 import { IContextualMenuItem } from '@fluentui/react';
@@ -358,6 +359,8 @@ export type _CaptionsInfo = {
     displayName: string;
     captionText: string;
     userId?: string;
+    sentimentAnalysis?: AnalyzeSentimentSuccessResult;
+    isMicrosoftUser?: boolean;
 };
 
 // @internal

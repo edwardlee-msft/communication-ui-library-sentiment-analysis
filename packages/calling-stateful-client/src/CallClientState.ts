@@ -37,6 +37,7 @@ import {
 } from '@azure/communication-common';
 /* @conditional-compile-remove(communication-common-beta-v3) */
 import { MicrosoftBotKind } from '@azure/communication-common';
+import { AnalyzeSentimentSuccessResult } from '@azure/ai-text-analytics';
 
 /**
  * State only version of {@link @azure/communication-calling#CallAgent} except calls is moved to be a child directly of
@@ -86,6 +87,11 @@ export interface CaptionsInfo {
    * The original spoken caption text prior to translating to subtitle language
    */
   spokenText?: string;
+
+  /**
+   * TODO: Add sentiment analysis hook
+   */
+  sentimentAnalysis?: AnalyzeSentimentSuccessResult;
 }
 
 /* @conditional-compile-remove(close-captions) */

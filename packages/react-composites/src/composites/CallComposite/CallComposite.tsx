@@ -13,14 +13,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AvatarPersonaDataCallback } from '../common/AvatarPersona';
 import { BaseProvider, BaseCompositeProps } from '../common/BaseComposite';
 import { CallCompositeIcons } from '../common/icons';
-import { CompositeLocale, useLocale } from '../localization';
+import { useLocale } from '../localization';
 import { CommonCallAdapter } from './adapter/CallAdapter';
 import { CallAdapterProvider, useAdapter } from './adapter/CallAdapterProvider';
 import { CallPage } from './pages/CallPage';
 import { ConfigurationPage } from './pages/ConfigurationPage';
 import { NoticePage } from './pages/NoticePage';
 import { useSelector } from './hooks/useSelector';
-import { getEndedCall, getPage } from './selectors/baseSelectors';
+import { getPage } from './selectors/baseSelectors';
 import { LobbyPage } from './pages/LobbyPage';
 /* @conditional-compile-remove(call-transfer) */
 import { TransferPage } from './pages/TransferPage';
@@ -43,7 +43,7 @@ import { PermissionConstraints } from '@azure/communication-calling';
 import { ParticipantRole } from '@azure/communication-calling';
 import { MobileChatSidePaneTabHeaderProps } from '../common/TabHeader';
 import { InjectedSidePaneProps, SidePaneProvider, SidePaneRenderer } from './components/SidePane/SidePaneProvider';
-import { CallState } from '@internal/calling-stateful-client';
+// import { CallState } from '@internal/calling-stateful-client';
 import { filterLatestErrors, trackErrorAsDismissed, updateTrackedErrorsWithActiveErrors } from './utils';
 import { TrackedErrors } from './types/ErrorTracking';
 import { usePropsFor } from './hooks/usePropsFor';
@@ -54,6 +54,8 @@ import { VideoGalleryLayout } from '@internal/react-components';
 import { capabilitiesChangedInfoAndRoleSelector } from './selectors/capabilitiesChangedInfoAndRoleSelector';
 /* @conditional-compile-remove(capabilities) */
 import { useTrackedCapabilityChangedNotifications } from './utils/TrackCapabilityChangedNotifications';
+import { SentimentSummaryPage } from './pages/SentimentSummaryPage';
+import { CaptionsProvider } from '../common/CaptionsProvider';
 
 /**
  * Props for {@link CallComposite}.
@@ -280,7 +282,7 @@ const MainScreen = (props: MainScreenProps): JSX.Element => {
 
   const { callInvitationUrl, onRenderAvatar, onFetchAvatarPersonaData, onFetchParticipantMenuItems } = props;
   const page = useSelector(getPage);
-  const endedCall = useSelector(getEndedCall);
+  // const endedCall = useSelector(getEndedCall);
 
   const [sidePaneRenderer, setSidePaneRenderer] = React.useState<SidePaneRenderer | undefined>();
   const [injectedSidePaneProps, setInjectedSidePaneProps] = React.useState<InjectedSidePaneProps>();
@@ -413,14 +415,15 @@ const MainScreen = (props: MainScreenProps): JSX.Element => {
       );
       break;
     case 'leftCall': {
-      const { title, moreDetails, disableStartCallButton } = getEndedCallStrings(locale, endedCall);
       pageElement = (
-        <NoticePage
+        <SentimentSummaryPage
           iconName="NoticePageLeftCall"
-          title={title}
-          moreDetails={moreDetails}
+          title={'Sentiment Analysis Summary'}
+          moreDetails={
+            'The objective of this project is to develop a sophisticated AI-based Sentiment Analysis tool that can accurately assess and provide real-time feedback on the sentiment of phone calls. This tool aims to enhance communication by enabling callers to understand how to effectively convey their points to the other party.'
+          }
           dataUiId={'left-call-page'}
-          disableStartCallButton={disableStartCallButton}
+          disableStartCallButton={false}
         />
       );
       break;
@@ -573,32 +576,34 @@ export const CallCompositeInner = (props: CallCompositeProps & InternalCallCompo
 
   return (
     <div className={mainScreenContainerClassName}>
-      <BaseProvider {...props}>
-        <CallAdapterProvider adapter={adapter}>
-          <MainScreen
-            callInvitationUrl={callInvitationUrl}
-            onFetchAvatarPersonaData={onFetchAvatarPersonaData}
-            onFetchParticipantMenuItems={onFetchParticipantMenuItems}
-            mobileView={mobileView}
-            modalLayerHostId={modalLayerHostId}
-            options={options}
-            onSidePaneIdChange={props.onSidePaneIdChange}
-            overrideSidePane={props.overrideSidePane}
-            mobileChatTabHeader={props.mobileChatTabHeader}
-          />
-          {
-            // This layer host is for ModalLocalAndRemotePIP in SidePane. This LayerHost cannot be inside the SidePane
-            // because when the SidePane is hidden, ie. style property display is 'none', it takes up no space. This causes problems when dragging
-            // the Modal because the draggable bounds thinks it has no space and will always return to its initial position after dragging.
-            // Additionally, this layer host cannot be in the Call Arrangement as it needs to be rendered before useMinMaxDragPosition() in
-            // common/utils useRef is called.
-            // Warning: this is fragile and works because the call arrangement page is only rendered after the call has connected and thus this
-            // LayerHost will be guaranteed to have rendered (and subsequently mounted in the DOM). This ensures the DOM element will be available
-            // before the call to `document.getElementById(modalLayerHostId)` is made.
-            <LayerHost id={modalLayerHostId} className={mergeStyles(modalLayerHostStyle)} />
-          }
-        </CallAdapterProvider>
-      </BaseProvider>
+      <CaptionsProvider>
+        <BaseProvider {...props}>
+          <CallAdapterProvider adapter={adapter}>
+            <MainScreen
+              callInvitationUrl={callInvitationUrl}
+              onFetchAvatarPersonaData={onFetchAvatarPersonaData}
+              onFetchParticipantMenuItems={onFetchParticipantMenuItems}
+              mobileView={mobileView}
+              modalLayerHostId={modalLayerHostId}
+              options={options}
+              onSidePaneIdChange={props.onSidePaneIdChange}
+              overrideSidePane={props.overrideSidePane}
+              mobileChatTabHeader={props.mobileChatTabHeader}
+            />
+            {
+              // This layer host is for ModalLocalAndRemotePIP in SidePane. This LayerHost cannot be inside the SidePane
+              // because when the SidePane is hidden, ie. style property display is 'none', it takes up no space. This causes problems when dragging
+              // the Modal because the draggable bounds thinks it has no space and will always return to its initial position after dragging.
+              // Additionally, this layer host cannot be in the Call Arrangement as it needs to be rendered before useMinMaxDragPosition() in
+              // common/utils useRef is called.
+              // Warning: this is fragile and works because the call arrangement page is only rendered after the call has connected and thus this
+              // LayerHost will be guaranteed to have rendered (and subsequently mounted in the DOM). This ensures the DOM element will be available
+              // before the call to `document.getElementById(modalLayerHostId)` is made.
+              <LayerHost id={modalLayerHostId} className={mergeStyles(modalLayerHostStyle)} />
+            }
+          </CallAdapterProvider>
+        </BaseProvider>
+      </CaptionsProvider>
     </div>
   );
 };
@@ -616,43 +621,43 @@ const getQueryOptions = (options: {
   return { video: true, audio: true };
 };
 
-const getEndedCallStrings = (
-  locale: CompositeLocale,
-  endedCall?: CallState
-): { title: string; moreDetails?: string; disableStartCallButton: boolean } => {
-  let title = locale.strings.call.leftCallTitle;
-  let moreDetails = locale.strings.call.leftCallMoreDetails;
-  let disableStartCallButton = false;
-  /* @conditional-compile-remove(teams-adhoc-call) */
-  switch (endedCall?.callEndReason?.subCode) {
-    case 10037:
-      if (locale.strings.call.participantCouldNotBeReachedTitle) {
-        title = locale.strings.call.participantCouldNotBeReachedTitle;
-        moreDetails = locale.strings.call.participantCouldNotBeReachedMoreDetails;
-        disableStartCallButton = true;
-      }
-      break;
-    case 10124:
-      if (locale.strings.call.permissionToReachTargetParticipantNotAllowedTitle) {
-        title = locale.strings.call.permissionToReachTargetParticipantNotAllowedTitle;
-        moreDetails = locale.strings.call.permissionToReachTargetParticipantNotAllowedMoreDetails;
-        disableStartCallButton = true;
-      }
-      break;
-    case 10119:
-      if (locale.strings.call.unableToResolveTenantTitle) {
-        title = locale.strings.call.unableToResolveTenantTitle;
-        moreDetails = locale.strings.call.unableToResolveTenantMoreDetails;
-        disableStartCallButton = true;
-      }
-      break;
-    case 10044:
-      if (locale.strings.call.participantIdIsMalformedTitle) {
-        title = locale.strings.call.participantIdIsMalformedTitle;
-        moreDetails = locale.strings.call.participantIdIsMalformedMoreDetails;
-        disableStartCallButton = true;
-      }
-      break;
-  }
-  return { title, moreDetails, disableStartCallButton };
-};
+// const getEndedCallStrings = (
+//   locale: CompositeLocale,
+//   endedCall?: CallState
+// ): { title: string; moreDetails?: string; disableStartCallButton: boolean } => {
+//   let title = locale.strings.call.leftCallTitle;
+//   let moreDetails = locale.strings.call.leftCallMoreDetails;
+//   let disableStartCallButton = false;
+//   /* @conditional-compile-remove(teams-adhoc-call) */
+//   switch (endedCall?.callEndReason?.subCode) {
+//     case 10037:
+//       if (locale.strings.call.participantCouldNotBeReachedTitle) {
+//         title = locale.strings.call.participantCouldNotBeReachedTitle;
+//         moreDetails = locale.strings.call.participantCouldNotBeReachedMoreDetails;
+//         disableStartCallButton = true;
+//       }
+//       break;
+//     case 10124:
+//       if (locale.strings.call.permissionToReachTargetParticipantNotAllowedTitle) {
+//         title = locale.strings.call.permissionToReachTargetParticipantNotAllowedTitle;
+//         moreDetails = locale.strings.call.permissionToReachTargetParticipantNotAllowedMoreDetails;
+//         disableStartCallButton = true;
+//       }
+//       break;
+//     case 10119:
+//       if (locale.strings.call.unableToResolveTenantTitle) {
+//         title = locale.strings.call.unableToResolveTenantTitle;
+//         moreDetails = locale.strings.call.unableToResolveTenantMoreDetails;
+//         disableStartCallButton = true;
+//       }
+//       break;
+//     case 10044:
+//       if (locale.strings.call.participantIdIsMalformedTitle) {
+//         title = locale.strings.call.participantIdIsMalformedTitle;
+//         moreDetails = locale.strings.call.participantIdIsMalformedMoreDetails;
+//         disableStartCallButton = true;
+//       }
+//       break;
+//   }
+//   return { title, moreDetails, disableStartCallButton };
+// };

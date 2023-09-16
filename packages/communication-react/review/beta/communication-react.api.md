@@ -5,6 +5,7 @@
 ```ts
 
 import { AddPhoneNumberOptions } from '@azure/communication-calling';
+import { AnalyzeSentimentSuccessResult } from '@azure/ai-text-analytics';
 import { AudioDeviceInfo } from '@azure/communication-calling';
 import { BackgroundBlurConfig } from '@azure/communication-calling';
 import { BackgroundBlurEffect } from '@azure/communication-calling';
@@ -1431,6 +1432,7 @@ export interface CaptionsInfo {
     captionLanguage?: string;
     captionText: string;
     resultType: CaptionsResultType;
+    sentimentAnalysis?: AnalyzeSentimentSuccessResult;
     speaker: CallerInfo;
     spokenLanguage: string;
     spokenText?: string;

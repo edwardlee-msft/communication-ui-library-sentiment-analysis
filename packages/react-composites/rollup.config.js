@@ -8,5 +8,5 @@ const common = commonConfig(Package);
 
 export default {
   ...common,
-  external: [...(common.external || []), '@internal/fake-backends']
+  external: [...(common.external || []), '@internal/fake-backends', 'chart.js/auto']
 };

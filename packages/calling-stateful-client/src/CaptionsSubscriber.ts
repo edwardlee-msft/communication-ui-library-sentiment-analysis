@@ -12,6 +12,13 @@ import {
 import { CallContext } from './CallContext';
 /* @conditional-compile-remove(close-captions) */
 import { CallIdRef } from './CallIdRef';
+import {
+  TextAnalyticsClient,
+  AzureKeyCredential,
+  AnalyzeSentimentResultArray,
+  AnalyzeSentimentSuccessResult
+} from '@azure/ai-text-analytics';
+import { CaptionsInfo } from './CallClientState';
 
 /* @conditional-compile-remove(close-captions) */
 /**
@@ -21,6 +28,7 @@ export class CaptionsSubscriber {
   private _callIdRef: CallIdRef;
   private _context: CallContext;
   private _captions: TeamsCaptions;
+  private _listOfCaptions: CaptionsInfo[] | [] = [];
 
   constructor(callIdRef: CallIdRef, context: CallContext, captions: TeamsCaptions) {
     this._callIdRef = callIdRef;
@@ -53,7 +61,29 @@ export class CaptionsSubscriber {
   };
 
   private onCaptionsReceived: TeamsCaptionsHandler = (caption: TeamsCaptionsInfo): void => {
-    this._context.addCaption(this._callIdRef.callId, caption);
+    this.getSentimentAnalysis(caption.captionText, this.textAnalyticsClient).then((a) => {
+      const sentimentResult = a[0] as AnalyzeSentimentSuccessResult;
+      this._context.addCaption(this._callIdRef.callId, caption, sentimentResult, this._listOfCaptions);
+    });
+  };
+
+  // private TEXT_ANALYTICS_ENDPOINT = process.env.TextAnalyticsEndpoint ?? '';
+  // private TEXT_ANALYTICS_API_KEY = process.env.TextAnalyticsApiKey ?? '';
+
+  // asdfTODO: ADD KEYS HERE:
+  private TEXT_ANALYTICS_ENDPOINT = '';
+  private TEXT_ANALYTICS_API_KEY = '';
+
+  private textAnalyticsClient = new TextAnalyticsClient(
+    this.TEXT_ANALYTICS_ENDPOINT,
+    new AzureKeyCredential(this.TEXT_ANALYTICS_API_KEY)
+  );
+
+  private getSentimentAnalysis = async (
+    text: string,
+    client: TextAnalyticsClient
+  ): Promise<AnalyzeSentimentResultArray> => {
+    return await client.analyzeSentiment([text ?? '']);
   };
 
   private isCaptionsActiveChanged: PropertyChangedEvent = (): void => {

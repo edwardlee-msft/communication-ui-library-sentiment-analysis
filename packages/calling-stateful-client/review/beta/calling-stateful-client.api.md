@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AnalyzeSentimentSuccessResult } from '@azure/ai-text-analytics';
 import { AudioDeviceInfo } from '@azure/communication-calling';
 import { Call } from '@azure/communication-calling';
 import { CallAgent } from '@azure/communication-calling';
@@ -159,6 +160,7 @@ export interface CaptionsInfo {
     captionLanguage?: string;
     captionText: string;
     resultType: CaptionsResultType;
+    sentimentAnalysis?: AnalyzeSentimentSuccessResult;
     speaker: CallerInfo;
     spokenLanguage: string;
     spokenText?: string;

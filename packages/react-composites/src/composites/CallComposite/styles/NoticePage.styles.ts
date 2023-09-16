@@ -42,3 +42,19 @@ export const titleStyles: IStyle = {
 export const moreDetailsStyles: IStyle = {
   fontSize: '1rem'
 };
+
+//Sentiment analysis styles below
+/**
+ * @private
+ */
+export const emojiSentimentStyles: IStyle = {
+  fontSize: '5rem',
+  fontWeight: 600
+};
+
+/**
+ * @private
+ */
+export const addTopPaddingStyle: IStyle = {
+  paddingTop: '0.5rem'
+};

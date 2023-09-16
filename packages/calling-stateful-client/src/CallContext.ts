@@ -53,6 +53,7 @@ import { LocalVideoStreamVideoEffectsState } from './CallClientState';
 import { convertFromSDKToCaptionInfoState } from './Converter';
 /* @conditional-compile-remove(raise-hand) */
 import { convertFromSDKToRaisedHandState } from './Converter';
+import { AnalyzeSentimentSuccessResult } from '@azure/ai-text-analytics';
 
 enableMapSet();
 // Needed to generate state diff for verbose logging.
@@ -790,7 +791,12 @@ export class CallContext {
     return id;
   }
   /* @conditional-compile-remove(close-captions) */
-  private processNewCaption(captions: CaptionsInfo[], newCaption: CaptionsInfo): void {
+  private processNewCaption(
+    captions: CaptionsInfo[],
+    newCaption: CaptionsInfo,
+    sentiment?: AnalyzeSentimentSuccessResult,
+    listOfCaptions?: CaptionsInfo[]
+  ): void {
     // going through current captions to find the last caption said by the same speaker, remove that caption if it's partial and replace with the new caption
     for (let index = captions.length - 1; index >= 0; index--) {
       const currentCaption = captions[index];
@@ -803,19 +809,26 @@ export class CallContext {
           toFlatCommunicationIdentifier(newCaption.speaker.identifier)
       ) {
         captions.splice(index, 1);
+        listOfCaptions?.splice(index, 1);
         break;
       }
     }
-
-    captions.push(newCaption);
+    const captionWithSentiment = { ...newCaption, sentimentAnalysis: sentiment };
+    captions.push(captionWithSentiment);
+    listOfCaptions?.push(captionWithSentiment);
 
     // If the array length exceeds 50, remove the oldest caption
-    if (captions.length > 50) {
-      captions.shift();
-    }
+    // if (captions.length > 50) {
+    //   captions.shift();
+    // }
   }
   /* @conditional-compile-remove(close-captions) */
-  public addCaption(callId: string, caption: TeamsCaptionsInfo): void {
+  public addCaption(
+    callId: string,
+    caption: TeamsCaptionsInfo,
+    sentiment?: AnalyzeSentimentSuccessResult,
+    listOfCaptions?: CaptionsInfo[]
+  ): void {
     this.modifyState((draft: CallClientState) => {
       const call = draft.calls[this._callIdHistory.latestCallId(callId)];
       if (call) {
@@ -825,7 +838,12 @@ export class CallContext {
           currentCaptionLanguage === '' ||
           currentCaptionLanguage === undefined
         ) {
-          this.processNewCaption(call.captionsFeature.captions, convertFromSDKToCaptionInfoState(caption));
+          this.processNewCaption(
+            call.captionsFeature.captions,
+            convertFromSDKToCaptionInfoState(caption),
+            sentiment,
+            listOfCaptions
+          );
         }
       }
     });
